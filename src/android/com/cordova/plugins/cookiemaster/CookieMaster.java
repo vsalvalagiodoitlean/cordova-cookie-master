@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import android.os.Build;
 import android.util.Log;
 
 import java.net.HttpCookie;
@@ -89,7 +90,7 @@ public class CookieMaster extends CordovaPlugin {
             CookieManager cookieManager = CookieManager.getInstance();
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-			    cookieManager.removeAllCookies();
+			    cookieManager.removeAllCookie();
 			    cookieManager.flush();
 			} else
 			{
