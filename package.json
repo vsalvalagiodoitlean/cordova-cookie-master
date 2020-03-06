@@ -1,9 +1,9 @@
 {
-  "name": "cordova-cookie-master",
-  "version": "1.0.0",
+  "name": "@zenput/cordova-cookie-master",
+  "version": "1.0.0-zp1",
   "description": "This plugin enables the management of cookies in WebViews on iOS and Android as those platforms restrict the use of 'document.cookie'.",
   "cordova": {
-    "id": "cordova-plugin-zencam",
+    "id": "cordova-cookie-master",
     "platforms": [
       "windows",
       "android",
