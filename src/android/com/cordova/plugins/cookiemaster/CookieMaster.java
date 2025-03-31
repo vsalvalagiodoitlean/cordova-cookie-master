@@ -16,6 +16,7 @@ import android.webkit.CookieManager;
 import android.webkit.WebView;
 import android.webkit.WebSettings;
 
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -91,7 +92,7 @@ public class CookieMaster extends CordovaPlugin {
                         String cookieString = cookie.getName() + "=" + cookie.getValue() + "; path=" + cookie.getPath() + "; domain=" + cookie.getDomain() + "; Secure; HttpOnly; Expires=" + expiresDate;
 
                         PersistentCookieStore cookieStore = new PersistentCookieStore(cordova.getActivity());
-                        cookieStore.add(url, cookie);
+                        cookieStore.add(new URI(url), cookie);
 
                         CookieManager cookieManager = CookieManager.getInstance();
                         cookieManager.setCookie(url, cookieString);
