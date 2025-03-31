@@ -68,34 +68,43 @@ public class CookieMaster extends CordovaPlugin {
             return true;
 
         } else if (ACTION_SET_COOKIE_VALUE.equals(action)) {
-            final String url = args.getString(0);
+            final  String url = args.getString(0);
             final String cookieName = args.getString(1);
             final String cookieValue = args.getString(2);
-	    final String cookieDomain = args.getString(3);
-	    final String cookiePath = args.getString(4);
+            final String cookieDomain = args.getString(3);
+            final String cookiePath = args.getString(4);
 
-	    long oneHourFromNow = System.currentTimeMillis() + (60 * 60 * 1000); // 1 hour in milliseconds
-	    SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-	    sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-	    String expiresDate = sdf.format(new Date(oneHourFromNow));
-		
+            long oneHourFromNow = System.currentTimeMillis() + (60 * 60 * 1000); // 1 hour in milliseconds
+            SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+            sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+            String expiresDate = sdf.format(new Date(oneHourFromNow));
+
             cordova.getThreadPool().execute(new Runnable() {
                 public void run() {
                     try {
                         HttpCookie cookie = new HttpCookie(cookieName, cookieValue);
-			cookie.setPath(cookiePath);
-			cookie.setDomain(cookieDomain);  // Ensure this is the correct domain
-			cookie.setSecure(true);  // If using HTTPS
-			cookie.setHttpOnly(true);
-			
-			String cookieString = cookie.getName() + "=" + cookie.getValue() + "; path=" + cookie.getPath() + "; domain=" + cookie.getDomain() + "; Secure; HttpOnly; Expires=" + expiresDate;
+                        cookie.setPath(cookiePath);
+                        cookie.setDomain(cookieDomain);  // Ensure this is the correct domain
+                        cookie.setSecure(true);  // If using HTTPS
+                        cookie.setHttpOnly(true);
 
+                        String cookieString = cookie.getName() + "=" + cookie.getValue() + "; path=" + cookie.getPath() + "; domain=" + cookie.getDomain() + "; Secure; HttpOnly; Expires=" + expiresDate;
+
+                        PersistentCookieStore cookieStore = new PersistentCookieStore(cordova.getActivity());
+                        cookieStore.add(uri, cookie);
+
+                        CookieManager cookieManager = CookieManager.getInstance();
+                        cookieManager.setCookie(url, cookieString);
+                        cookieManager.flush();
+
+            /*
 		    cordova.getActivity().runOnUiThread(() -> {
-			CookieManager cookieManager = CookieManager.getInstance();		    
+			CookieManager cookieManager = CookieManager.getInstance();
 			cookieManager.setCookie(url, cookieString);
 			// Ensure cookies are written to storage
 			cookieManager.flush();
 		    });
+             */
 
                         PluginResult res = new PluginResult(PluginResult.Status.OK, "Successfully added cookie");
                         callbackContext.sendPluginResult(res);
@@ -113,15 +122,15 @@ public class CookieMaster extends CordovaPlugin {
             CookieManager cookieManager = CookieManager.getInstance();
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-			    cookieManager.removeAllCookie();
-			    cookieManager.flush();
-			} else
-			{
-			    cookieManager.removeAllCookie();
-			    cookieManager.removeSessionCookie();
-			}
+                cookieManager.removeAllCookie();
+                cookieManager.flush();
+            } else
+            {
+                cookieManager.removeAllCookie();
+                cookieManager.removeSessionCookie();
+            }
 
-			callbackContext.success();
+            callbackContext.success();
             return true;
         }
 
@@ -144,7 +153,28 @@ public class CookieMaster extends CordovaPlugin {
             CookieManager cookieManager = CookieManager.getInstance();
             cookieManager.setAcceptCookie(true);
             cookieManager.setAcceptThirdPartyCookies(webView, true); // Needed for subdomains
+
+            // Load persistent cookies into the CookieManager
+            PersistentCookieStore cookieStore = new PersistentCookieStore(cordova.getActivity());
+            for (HttpCookie cookie : cookieStore.getCookies()) {
+                cookieManager.setCookie(cookie.getDomain(), cookie.getName() + "=" + cookie.getValue());
+            }
+
             cookieManager.flush(); // Ensure persistence
         });
+
+        /*
+
+        cordova.getActivity().runOnUiThread(() -> {
+            WebView webView = new WebView(cordova.getActivity());
+            WebSettings webSettings = webView.getSettings();
+            webSettings.setJavaScriptEnabled(true);
+
+            CookieManager cookieManager = CookieManager.getInstance();
+            cookieManager.setAcceptCookie(true);
+            cookieManager.setAcceptThirdPartyCookies(webView, true); // Needed for subdomains
+            cookieManager.flush(); // Ensure persistence
+        });
+        */
     }
 }
