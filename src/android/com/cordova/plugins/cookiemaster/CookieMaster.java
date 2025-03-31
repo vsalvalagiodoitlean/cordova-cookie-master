@@ -69,10 +69,15 @@ public class CookieMaster extends CordovaPlugin {
                 public void run() {
                     try {
                         HttpCookie cookie = new HttpCookie(cookieName, cookieValue);
-
-                        String cookieString = cookie.toString().replace("\"", "");
-                        CookieManager cookieManager = CookieManager.getInstance();
-                        cookieManager.setCookie(url, cookieString);
+			cookie.setPath("/");
+			cookie.setDomain("outsystems.app");  // Ensure this is the correct domain
+			cookie.setSecure(true);  // If using HTTPS
+			cookie.setHttpOnly(true);
+			
+			String cookieString = cookie.getName() + "=" + cookie.getValue() + "; path=" + cookie.getPath() + "; domain=" + cookie.getDomain() + "; Secure; HttpOnly";
+			
+			CookieManager cookieManager = CookieManager.getInstance();
+			cookieManager.setCookie("https://dohle-dev.outsystems.app", cookieString);
 
                         PluginResult res = new PluginResult(PluginResult.Status.OK, "Successfully added cookie");
                         callbackContext.sendPluginResult(res);
