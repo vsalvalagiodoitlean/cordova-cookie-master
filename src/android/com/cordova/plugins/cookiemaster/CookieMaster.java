@@ -91,10 +91,7 @@ public class CookieMaster extends CordovaPlugin {
 			String cookieString = cookie.getName() + "=" + cookie.getValue() + "; path=" + cookie.getPath() + "; domain=" + cookie.getDomain() + "; Secure; HttpOnly; Expires=" + expiresDate;
 
 		    cordova.getActivity().runOnUiThread(() -> {
-			CookieManager cookieManager = CookieManager.getInstance();
-			cookieManager.setAcceptCookie(true);
-			cookieManager.setAcceptThirdPartyCookies(webView, true); // For Android 5.0+
-			    
+			CookieManager cookieManager = CookieManager.getInstance();		    
 			cookieManager.setCookie(url, cookieString);
 			// Ensure cookies are written to storage
 			cookieManager.flush();
