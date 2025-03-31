@@ -70,7 +70,7 @@ public class CookieMaster extends CordovaPlugin {
                     try {
                         HttpCookie cookie = new HttpCookie(cookieName, cookieValue);
 			cookie.setPath("/");
-			cookie.setDomain("outsystems.app");  // Ensure this is the correct domain
+			cookie.setDomain(".outsystems.app");  // Ensure this is the correct domain
 			cookie.setSecure(true);  // If using HTTPS
 			cookie.setHttpOnly(true);
 			
