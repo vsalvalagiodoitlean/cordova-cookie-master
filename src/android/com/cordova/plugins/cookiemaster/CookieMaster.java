@@ -91,7 +91,7 @@ public class CookieMaster extends CordovaPlugin {
                         String cookieString = cookie.getName() + "=" + cookie.getValue() + "; path=" + cookie.getPath() + "; domain=" + cookie.getDomain() + "; Secure; HttpOnly; Expires=" + expiresDate;
 
                         PersistentCookieStore cookieStore = new PersistentCookieStore(cordova.getActivity());
-                        cookieStore.add(uri, cookie);
+                        cookieStore.add(url, cookie);
 
                         CookieManager cookieManager = CookieManager.getInstance();
                         cookieManager.setCookie(url, cookieString);
