@@ -89,21 +89,16 @@ public class CookieMaster extends CordovaPlugin {
 			cookie.setHttpOnly(true);
 			
 			String cookieString = cookie.getName() + "=" + cookie.getValue() + "; path=" + cookie.getPath() + "; domain=" + cookie.getDomain() + "; Secure; HttpOnly; Expires=" + expiresDate;
-			
-			CookieManager cookieManager = CookieManager.getInstance();
 
-			// Enable cookies for WebView
-		        WebView webView = new WebView(this);
-		        WebSettings webSettings = webView.getSettings();
-		        webSettings.setJavaScriptEnabled(true);
-		    
-		        CookieManager cookieManager = CookieManager.getInstance();
-		        cookieManager.setAcceptCookie(true);
-		        cookieManager.setAcceptThirdPartyCookies(webView, true); // For Android 5.0+
+		    cordova.getActivity().runOnUiThread(() -> {
+			CookieManager cookieManager = CookieManager.getInstance();
+			cookieManager.setAcceptCookie(true);
+			cookieManager.setAcceptThirdPartyCookies(webView, true); // For Android 5.0+
 			    
 			cookieManager.setCookie(url, cookieString);
 			// Ensure cookies are written to storage
-		        cookieManager.flush();
+			cookieManager.flush();
+		    });
 
                         PluginResult res = new PluginResult(PluginResult.Status.OK, "Successfully added cookie");
                         callbackContext.sendPluginResult(res);
@@ -136,5 +131,23 @@ public class CookieMaster extends CordovaPlugin {
         callbackContext.error("Invalid action");
         return false;
 
+    }
+
+    @Override
+    protected void pluginInitialize() {
+        enableWebViewCookies();
+    }
+
+    private void enableWebViewCookies() {
+        cordova.getActivity().runOnUiThread(() -> {
+            WebView webView = new WebView(cordova.getActivity());
+            WebSettings webSettings = webView.getSettings();
+            webSettings.setJavaScriptEnabled(true);
+
+            CookieManager cookieManager = CookieManager.getInstance();
+            cookieManager.setAcceptCookie(true);
+            cookieManager.setAcceptThirdPartyCookies(webView, true); // Needed for subdomains
+            cookieManager.flush(); // Ensure persistence
+        });
     }
 }
