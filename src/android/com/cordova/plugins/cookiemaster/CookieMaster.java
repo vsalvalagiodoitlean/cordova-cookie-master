@@ -14,6 +14,11 @@ import java.net.HttpCookie;
 
 import android.webkit.CookieManager;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
 public class CookieMaster extends CordovaPlugin {
 
     private final String TAG = "CookieMasterPlugin";
@@ -67,6 +72,11 @@ public class CookieMaster extends CordovaPlugin {
 	    final String cookieDomain = args.getString(3);
 		final String cookiePath = args.getString(4);
 
+		long oneHourFromNow = System.currentTimeMillis() + (60 * 60 * 1000); // 1 hour in milliseconds
+		SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+		String expiresDate = sdf.format(new Date(oneHourFromNow));
+		
             cordova.getThreadPool().execute(new Runnable() {
                 public void run() {
                     try {
@@ -76,7 +86,7 @@ public class CookieMaster extends CordovaPlugin {
 			cookie.setSecure(true);  // If using HTTPS
 			cookie.setHttpOnly(true);
 			
-			String cookieString = cookie.getName() + "=" + cookie.getValue() + "; path=" + cookie.getPath() + "; domain=" + cookie.getDomain() + "; Secure; HttpOnly";
+			String cookieString = cookie.getName() + "=" + cookie.getValue() + "; path=" + cookie.getPath() + "; domain=" + cookie.getDomain() + "; Secure; HttpOnly; Expires=" + expiresDate;
 			
 			CookieManager cookieManager = CookieManager.getInstance();
 			cookieManager.setCookie(url, cookieString);
