@@ -13,6 +13,8 @@ import android.util.Log;
 import java.net.HttpCookie;
 
 import android.webkit.CookieManager;
+import android.webkit.WebView;
+import android.webkit.WebSettings;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -70,12 +72,12 @@ public class CookieMaster extends CordovaPlugin {
             final String cookieName = args.getString(1);
             final String cookieValue = args.getString(2);
 	    final String cookieDomain = args.getString(3);
-		final String cookiePath = args.getString(4);
+	    final String cookiePath = args.getString(4);
 
-		long oneHourFromNow = System.currentTimeMillis() + (60 * 60 * 1000); // 1 hour in milliseconds
-		SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-		String expiresDate = sdf.format(new Date(oneHourFromNow));
+	    long oneHourFromNow = System.currentTimeMillis() + (60 * 60 * 1000); // 1 hour in milliseconds
+	    SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+	    sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+	    String expiresDate = sdf.format(new Date(oneHourFromNow));
 		
             cordova.getThreadPool().execute(new Runnable() {
                 public void run() {
@@ -89,7 +91,19 @@ public class CookieMaster extends CordovaPlugin {
 			String cookieString = cookie.getName() + "=" + cookie.getValue() + "; path=" + cookie.getPath() + "; domain=" + cookie.getDomain() + "; Secure; HttpOnly; Expires=" + expiresDate;
 			
 			CookieManager cookieManager = CookieManager.getInstance();
+
+			// Enable cookies for WebView
+		        WebView webView = new WebView(this);
+		        WebSettings webSettings = webView.getSettings();
+		        webSettings.setJavaScriptEnabled(true);
+		    
+		        CookieManager cookieManager = CookieManager.getInstance();
+		        cookieManager.setAcceptCookie(true);
+		        cookieManager.setAcceptThirdPartyCookies(webView, true); // For Android 5.0+
+			    
 			cookieManager.setCookie(url, cookieString);
+			// Ensure cookies are written to storage
+		        cookieManager.flush();
 
                         PluginResult res = new PluginResult(PluginResult.Status.OK, "Successfully added cookie");
                         callbackContext.sendPluginResult(res);
